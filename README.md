@@ -51,6 +51,10 @@ the note is its own failure. The rules coder is the floor (recall 1.0, precision
 it over-codes negated symptoms like "no fever"); the model has to beat it. A case whose model
 call fails after retries scores zero and carries the error, so one 429 cannot abort the run.
 
+First live run (2026-09-17, free-tier Gemini, 16 cases): rules coder precision 77.1% / recall
+100% / F1 87.0%; `gemini-3.7-flash` precision 100% / recall 78.7% / F1 88.1% / grounded 100%,
+where every miss is one of four cases the free tier answered with a 429 and the page says so.
+
 ## Running it
 
 ```

@@ -9,7 +9,7 @@ module Coders
   # is kept but flagged unverified, so the reviewer sees exactly which suggestions the
   # model could not point to.
   class GeminiCoder
-    MODEL = ENV.fetch("GEMINI_MODEL", "gemini-3.6-flash")
+    MODEL = ENV.fetch("GEMINI_MODEL", "gemini-3.7-flash")
     ENDPOINT = "https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent".freeze
 
     SCHEMA = {
@@ -64,7 +64,6 @@ module Coders
 
     def propose(note)
       uri = URI(format(ENDPOINT, MODEL))
-      uri.query = URI.encode_www_form(key: ENV["GEMINI_API_KEY"])
       dictionary = CodeSet.where(billable: true).order(:kind, :code).map { |c| "#{c.kind} | #{c.code} | #{c.description}" }.join("\n")
       excludes = Excludes1Rule.all.map { |r| "#{r.code_a}* with #{r.code_b}*" }.join("; ")
       payload = {
@@ -73,7 +72,8 @@ module Coders
       }
       http = Net::HTTP.new(uri.host, uri.port)
       http.use_ssl = true; http.open_timeout = 8; http.read_timeout = 60
-      res = http.post(uri.request_uri, payload.to_json, "Content-Type" => "application/json")
+      res = http.post(uri.request_uri, payload.to_json, "Content-Type" => "application/json",
+                      "x-goog-api-key" => ENV["GEMINI_API_KEY"])
       raise "gemini http #{res.code}: #{res.body[0, 200]}" unless res.code.to_i == 200
       text = JSON.parse(res.body).dig("candidates", 0, "content", "parts", 0, "text")
       raise "gemini returned no content" if text.to_s.strip.empty?

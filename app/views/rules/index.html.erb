@@ -1,0 +1,21 @@
+<% content_for :title, "Rules | Abstractor" %>
+<h1>Rules engine</h1>
+<p class="lede">What blocks a claim, and why. Each issue names its rule so a coder can dispute it.</p>
+<table class="rules">
+  <tr><th>Rule</th><th>Severity</th><th>What it catches</th></tr>
+  <tr><td><code>unreviewed</code></td><td>block</td><td>An agent proposal nobody has accepted or rejected. The agent never gets the last word.</td></tr>
+  <tr><td><code>header-code</code></td><td>block</td><td>A category header (E11, J45) accepted instead of a billable code at the highest specificity the note supports.</td></tr>
+  <tr><td><code>excludes1</code></td><td>block</td><td>Two accepted diagnoses that ICD-10-CM says cannot be reported together. Prefix-matched so a category rule covers every subcode.</td></tr>
+  <tr><td><code>no-diagnosis</code></td><td>block</td><td>Procedure codes with no accepted diagnosis to point at.</td></tr>
+  <tr><td><code>multiple-em</code></td><td>block</td><td>More than one evaluation-and-management code on one encounter.</td></tr>
+  <tr><td><code>modifier-25</code></td><td>block</td><td>An E/M billed on the same day as a procedure without modifier 25 documenting a separately identifiable service.</td></tr>
+  <tr><td><code>symptom-integral</code></td><td>warn</td><td>A symptom code (R-codes) alongside a definitive diagnosis. Drop it if the symptom is integral.</td></tr>
+  <tr><td><code>unverified-evidence</code></td><td>warn</td><td>A code accepted with a quote that does not appear in the note.</td></tr>
+</table>
+<h2>Excludes1 pairs loaded</h2>
+<ul><% @excludes.each do |r| %><li><code><%= r.code_a %>*</code> with <code><%= r.code_b %>*</code>: <%= r.note %></li><% end %></ul>
+<h2>Code dictionary</h2>
+<div class="split">
+  <div><h3>ICD-10-CM (<%= @dx.size %>)</h3><table class="dict"><% @dx.each do |c| %><tr class="<%= c.billable ? '' : 'header' %>"><td><code><%= c.code %></code></td><td><%= c.description %><% unless c.billable %> <em>(header, not billable)</em><% end %></td></tr><% end %></table></div>
+  <div><h3>CPT (<%= @px.size %>)</h3><table class="dict"><% @px.each do |c| %><tr><td><code><%= c.code %></code></td><td><%= c.description %><% if c.em %> <em>(E/M)</em><% end %></td></tr><% end %></table></div>
+</div>

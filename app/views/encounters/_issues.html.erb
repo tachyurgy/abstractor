@@ -1,0 +1,16 @@
+<% issues = encounter.issues %>
+<div id="issues" class="issues">
+  <% if encounter.finalized? %>
+    <div class="ok">Finalized as <b><%= encounter.claim_number %></b> by <%= encounter.finalized_by %> at <%= encounter.finalized_at&.strftime("%Y-%m-%d %H:%M") %>.</div>
+  <% elsif issues.empty? && encounter.code_proposals.accepted.any? %>
+    <div class="ok">Rules engine: clean. <%= encounter.accepted_dx.size %> dx, <%= encounter.accepted_px.size %> px accepted. Ready to finalize.</div>
+  <% elsif issues.empty? %>
+    <div class="muted">No proposals yet. Run the coding agent or add codes by hand.</div>
+  <% else %>
+    <ul>
+      <% issues.each do |i| %>
+        <li class="<%= i[:severity] %>"><span class="rule"><%= i[:rule] %></span> <%= i[:message] %></li>
+      <% end %>
+    </ul>
+  <% end %>
+</div>

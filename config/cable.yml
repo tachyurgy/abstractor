@@ -1,0 +1,10 @@
+development:
+  adapter: async
+
+test:
+  adapter: test
+
+# Single Puma process on one box: the in-process async adapter is enough for
+# Turbo Stream broadcasts and costs no Redis.
+production:
+  adapter: async

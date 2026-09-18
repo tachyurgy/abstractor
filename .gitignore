@@ -1,0 +1,12 @@
+/.bundle
+/log/*
+/tmp/*
+!/log/.keep
+!/tmp/.keep
+/storage/*
+/config/master.key
+/config/credentials/*.key
+.env*
+/public/assets
+/node_modules
+.DS_Store

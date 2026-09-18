@@ -1,0 +1,49 @@
+<% content_for :title, "#{@encounter.patient_ref} | Abstractor" %>
+<%= turbo_stream_from @encounter %>
+<div class="enc-head">
+  <div>
+    <h1><%= @encounter.note.lines.first.strip %></h1>
+    <div class="card-meta"><%= @encounter.patient_ref %> · <%= @encounter.provider %> · DOS <%= @encounter.date_of_service %> · <span class="status <%= @encounter.status %>"><%= @encounter.status %></span><% if @encounter.finalized? %> · <b><%= @encounter.claim_number %></b><% end %></div>
+  </div>
+  <div class="enc-actions">
+    <% unless @encounter.finalized? %>
+      <%= button_to "Run coding agent", code_encounter_path(@encounter), class: "btn secondary", form: { data: { turbo: false } } %>
+      <%= button_to "Finalize claim", finalize_encounter_path(@encounter), class: "btn", form: { data: { turbo_confirm: "Finalize this claim? This runs the rules engine and is exactly-once." } } %>
+    <% end %>
+  </div>
+</div>
+<div class="split">
+  <section class="note-pane">
+    <h2>Clinical note</h2>
+    <pre class="note" id="note"><%= render "encounters/highlighted_note", encounter: @encounter %></pre>
+    <details class="audit"><summary>Audit log (<%= @encounter.events.size %>)</summary>
+      <ul>
+        <% @encounter.events.each do |ev| %>
+          <li><time><%= ev.created_at.strftime("%H:%M:%S") %></time> <b><%= ev.actor %></b> <%= ev.action %> <code><%= ev.payload.to_json %></code></li>
+        <% end %>
+      </ul>
+    </details>
+  </section>
+  <section class="review-pane">
+    <%= render "encounters/issues", encounter: @encounter %>
+    <h2>Diagnoses <small>ICD-10-CM</small></h2>
+    <div id="proposals-dx" class="proposals">
+      <%= render partial: "code_proposals/proposal", collection: @encounter.code_proposals.dx, as: :proposal %>
+    </div>
+    <h2>Procedures and E/M <small>CPT</small></h2>
+    <div id="proposals-px" class="proposals">
+      <%= render partial: "code_proposals/proposal", collection: @encounter.code_proposals.px, as: :proposal %>
+    </div>
+    <% unless @encounter.finalized? %>
+      <details class="add"><summary>Add a code the agent missed</summary>
+        <%= form_with url: encounter_code_proposals_path(@encounter), scope: :code_proposal, class: "inline-form", data: { turbo: false } do |f| %>
+          <%= f.select :kind, [["ICD-10-CM", "dx"], ["CPT", "px"]] %>
+          <%= f.text_field :code, placeholder: "E11.9", required: true %>
+          <%= f.text_field :evidence, placeholder: "verbatim quote from the note" %>
+          <%= f.text_field :modifiers, placeholder: "modifiers (25)" %>
+          <%= f.submit "Add as accepted", class: "btn small" %>
+        <% end %>
+      </details>
+    <% end %>
+  </section>
+</div>

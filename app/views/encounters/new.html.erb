@@ -1,0 +1,13 @@
+<% content_for :title, "New encounter | Abstractor" %>
+<h1>New encounter</h1>
+<%= form_with model: @encounter, class: "form" do |f| %>
+  <% if @encounter.errors.any? %><div class="flash alert"><%= @encounter.errors.full_messages.join(", ") %></div><% end %>
+  <div class="row">
+    <label>Patient ref <%= f.text_field :patient_ref, placeholder: "PT-2001", required: true %></label>
+    <label>Provider <%= f.text_field :provider, required: true %></label>
+    <label>Date of service <%= f.date_field :date_of_service, required: true %></label>
+  </div>
+  <label>Clinical note (synthetic only, no real PHI)
+    <%= f.text_area :note, rows: 16, required: true, placeholder: "CC: ...\nHPI: ...\nExam: ...\nA/P: ...\nMDM: ..." %></label>
+  <%= f.submit "Create encounter", class: "btn" %>
+<% end %>

@@ -1,0 +1,2 @@
+<% note = encounter.note; pos = 0; spans = encounter.evidence_spans %>
+<% spans.each do |s| %><% next if s[:start] < pos %><%= note[pos...s[:start]] %><mark class="<%= s[:kind] %> <%= s[:state] %>" title="<%= s[:code] %>"><%= note[s[:start], s[:len]] %></mark><% pos = s[:start] + s[:len] %><% end %><%= note[pos..] %>

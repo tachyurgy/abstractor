@@ -1,0 +1,30 @@
+<%= turbo_frame_tag dom_id(proposal), class: "proposal #{proposal.state} #{proposal.grounded? ? 'grounded' : 'unverified'}" do %>
+  <div class="p-head">
+    <span class="code"><%= proposal.code %><% if proposal.modifier_list.any? %><small>-<%= proposal.modifier_list.join("-") %></small><% end %></span>
+    <span class="desc"><%= proposal.description %></span>
+    <span class="conf" title="confidence"><%= proposal.confidence %>%</span>
+    <span class="state-tag <%= proposal.state %>"><%= proposal.state %></span>
+  </div>
+  <div class="p-body">
+    <div class="rationale"><%= proposal.rationale %></div>
+    <div class="evidence <%= proposal.grounded? ? '' : 'bad' %>">
+      <% if proposal.evidence.present? %>
+        <%= proposal.grounded? ? "Quote" : "Unverified quote (not in note)" %>: <q><%= proposal.evidence %></q>
+      <% else %>No evidence quoted.<% end %>
+    </div>
+    <div class="src">source: <%= proposal.source %><% if proposal.reviewed_by %> · reviewed by <%= proposal.reviewed_by %><% end %></div>
+  </div>
+  <% unless proposal.encounter.finalized? %>
+    <div class="p-actions">
+      <% if proposal.proposed? %>
+        <%= button_to "Accept", accept_code_proposal_path(proposal), method: :patch, class: "btn small" %>
+        <% if proposal.em? %>
+          <%= button_to "Accept with modifier 25", accept_code_proposal_path(proposal, modifiers: "25"), method: :patch, class: "btn small secondary" %>
+        <% end %>
+        <%= button_to "Reject", reject_code_proposal_path(proposal), method: :patch, class: "btn small danger" %>
+      <% else %>
+        <%= button_to "Reopen", reopen_code_proposal_path(proposal), method: :patch, class: "btn small ghost" %>
+      <% end %>
+    </div>
+  <% end %>
+<% end %>

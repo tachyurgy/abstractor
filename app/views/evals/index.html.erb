@@ -1,0 +1,34 @@
+<% content_for :title, "Evals | Abstractor" %>
+<section class="hero">
+  <h1>Coder evals</h1>
+  <p class="lede">Every coder is scored on the code set, not on prose: a proposal is correct only if the exact code is in the labelled gold set for that note. Grounded percentage is reported separately because being right without being able to quote the note is its own failure. Current coder: <code><%= @coder %></code>.</p>
+  <%= button_to "Run eval now", evals_path, class: "btn" %>
+</section>
+<table class="runs">
+  <thead><tr><th>Ran</th><th>Coder</th><th>Cases</th><th>TP</th><th>FP</th><th>FN</th><th>Precision</th><th>Recall</th><th>F1</th><th>Grounded</th></tr></thead>
+  <tbody>
+  <% @runs.each do |r| %>
+    <tr>
+      <td><%= r.ran_at.strftime("%Y-%m-%d %H:%M") %></td><td><code><%= r.coder %></code></td><td><%= r.n_cases %></td>
+      <td><%= r.tp %></td><td><%= r.fp %></td><td><%= r.fn %></td>
+      <td><%= (r.precision * 100).round(1) %>%</td><td><%= (r.recall * 100).round(1) %>%</td><td><b><%= (r.f1 * 100).round(1) %>%</b></td><td><%= (r.grounded_pct * 100).round(1) %>%</td>
+    </tr>
+    <tr class="detail"><td colspan="10">
+      <details><summary>Per-case misses</summary>
+        <ul>
+        <% r.details.each do |d| %>
+          <li><b><%= d["title"] %></b>: got <%= d["got"].join(", ") %><% if d["missed"].any? %> · <span class="miss">missed <%= d["missed"].join(", ") %></span><% end %><% if d["extra"].any? %> · <span class="extra">extra <%= d["extra"].join(", ") %></span><% end %> · grounded <%= d["grounded"] %>/<%= d["proposed"] %><% if d["error"] %> · <span class="miss">error: <%= d["error"] %></span><% end %></li>
+        <% end %>
+        </ul>
+      </details>
+    </td></tr>
+  <% end %>
+  <% if @runs.empty? %><tr><td colspan="10" class="muted">No runs yet.</td></tr><% end %>
+  </tbody>
+</table>
+<h2>Labelled cases (<%= @cases.size %>)</h2>
+<div class="cases">
+<% @cases.each do |c| %>
+  <details><summary><%= c.title %> <span class="gold">dx <%= c.gold_dx.join(" ") %> · px <%= c.gold_px.join(" ") %></span></summary><pre class="note small"><%= c.note %></pre></details>
+<% end %>
+</div>

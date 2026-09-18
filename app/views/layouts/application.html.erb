@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title><%= content_for(:title) || "Abstractor" %></title>
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="description" content="A medical coding worklist where an AI agent proposes ICD-10-CM and CPT codes with verbatim evidence, a coder reviews them inline, and a rules engine keeps a wrong claim from ever being finalized.">
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <%= javascript_importmap_tags %>
+  </head>
+  <body>
+    <header class="top">
+      <a class="brand" href="/"><span class="mark">A</span> Abstractor <small>coding worklist</small></a>
+      <nav>
+        <%= link_to "Worklist", root_path %>
+        <%= link_to "Evals", evals_path %>
+        <%= link_to "Rules and dictionary", rules_path %>
+        <a href="https://github.com/tachyurgy/abstractor">Source</a>
+      </nav>
+    </header>
+    <% if notice %><div class="flash notice"><%= notice %></div><% end %>
+    <% if alert %><div class="flash alert"><%= alert %></div><% end %>
+    <main><%= yield %></main>
+    <footer>Synthetic notes and fabricated patient references. Rules are an illustrative subset of ICD-10-CM and CPT conventions. Built with Rails 8, Hotwire and PostgreSQL by <a href="https://consulting.levelbrook.com">Levelbrook Consulting</a>.</footer>
+  </body>
+</html>

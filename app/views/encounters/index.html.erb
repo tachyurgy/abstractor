@@ -1,0 +1,29 @@
+<% content_for :title, "Worklist | Abstractor" %>
+<%= turbo_stream_from "worklist" %>
+<section class="hero">
+  <h1>Coding worklist</h1>
+  <p class="lede">Clinical notes come in. An agent (<code><%= @coder %></code>) proposes ICD-10-CM and CPT codes, each with a verbatim quote from the note. A coder accepts, rejects or edits every proposal. The rules engine will not let a claim finalize with an Excludes1 conflict, a header code, an E/M missing modifier 25, or an unreviewed suggestion.</p>
+  <p class="actions"><%= link_to "New encounter", new_encounter_path, class: "btn" %></p>
+</section>
+<% %w[new proposed finalized].each do |st| %>
+  <% rows = @encounters.select { |e| e.status == st } %>
+  <h2 class="group"><%= { "new" => "Awaiting coding", "proposed" => "In review", "finalized" => "Finalized" }[st] %> <span class="count"><%= rows.size %></span></h2>
+  <% if rows.empty? %><p class="muted">None.</p><% end %>
+  <div class="cards">
+  <% rows.each do |e| %>
+    <%= turbo_frame_tag dom_id(e) do %>
+      <a class="card" href="<%= encounter_path(e) %>" data-turbo-frame="_top">
+        <div class="card-title"><%= e.note.lines.first.strip %></div>
+        <div class="card-meta"><%= e.patient_ref %> · <%= e.provider %> · DOS <%= e.date_of_service %></div>
+        <div class="card-codes">
+          <% e.code_proposals.each do |p| %>
+            <span class="chip <%= p.kind %> <%= p.state %>"><%= p.code %></span>
+          <% end %>
+          <% if e.code_proposals.empty? %><span class="muted">no proposals yet</span><% end %>
+        </div>
+        <% if e.finalized? %><div class="card-claim"><%= e.claim_number %> · <%= e.finalized_by %></div><% end %>
+      </a>
+    <% end %>
+  <% end %>
+  </div>
+<% end %>
